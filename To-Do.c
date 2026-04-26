@@ -19,17 +19,17 @@ typedef struct Nodo {
 } Nodo;
 
 // Funciones
-struct Nodo * CrearNodo(char * Descripcion[]);
+struct Nodo * CrearNodo(char * Descripcion);
 void InsertarNodo(struct Nodo ** Start, struct Nodo * VNodo);
 void InsertarAlFinal(struct Nodo * Start, struct Nodo * VNodo);
 struct Nodo * BuscarNodo(struct Nodo * Start, int IdBuscado);
 struct Nodo * QuitarNodo(struct Nodo ** Start, int IdBuscado);
 void EliminarNodo(struct Nodo * VNodo);
-
+void EliminarListaNodo(struct Nodo * Start);
 
 int main() {
-    struct Nodo *TareasPendientes;
-    struct Nodo *TareasRealizadas;
+    struct Nodo *TareasPendientes = NULL;
+    struct Nodo *TareasRealizadas = NULL;
 
     srand(time(NULL)); // Empezar con una semilla distinta para el generador de numeros aleatoreo
 
@@ -37,20 +37,22 @@ int main() {
 }
 
 
-struct Nodo * CrearNodo(char * Descripcion[]) {
+struct Nodo * CrearNodo(char * Descripcion) {
     struct Nodo * VNodo = (struct Nodo *) malloc(sizeof(struct Nodo));
-    TareaIDs++;
 
     VNodo->T.TareaID = TareaIDs;
-    VNodo->T.Descripcion = Descripcion;
+    VNodo->T.Descripcion = (char *) malloc(sizeof(char) * (strlen(Descripcion) + 1));
+    strcpy(VNodo->T.Descripcion, Descripcion);
     VNodo->T.Duracion = (rand() % (100 - 10 + 1)) + 10; // (rand() % (MAX - MIN + 1)) + MIN
     VNodo->Siguiente = NULL;
+
+    TareaIDs++;
 
     return VNodo;
 }
 
 void InsertarNodo(struct Nodo ** Start, struct Nodo * VNodo) {
-    VNodo->Siguiente = Start;
+    VNodo->Siguiente = *Start;
     *Start = VNodo;
 }
 
@@ -78,7 +80,7 @@ struct Nodo * QuitarNodo(struct Nodo ** Start, int IdBuscado) {
     struct Nodo *NodoAux = *Start;
     struct Nodo *NodoAnt = NULL;
 
-    while (NodoAux != NULL && NodoAnt->T.TareaID != IdBuscado) {
+    while (NodoAux != NULL && NodoAux->T.TareaID != IdBuscado) {
         NodoAnt = NodoAux;
         NodoAux = NodoAux->Siguiente;
     }
@@ -99,5 +101,17 @@ void EliminarNodo(struct Nodo * VNodo) {
     if (VNodo) {
         if (VNodo->T.Descripcion) free(VNodo->T.Descripcion);
         free(VNodo);
+    }
+}
+
+void EliminarListaNodo(struct Nodo * Start) {
+    struct Nodo *NodoAux = Start;
+    struct Nodo *NodoAnt = NULL;
+
+    while (NodoAux) {
+        NodoAnt = NodoAux;
+        NodoAux = NodoAux->Siguiente;
+
+        EliminarNodo(NodoAnt);
     }
 }
