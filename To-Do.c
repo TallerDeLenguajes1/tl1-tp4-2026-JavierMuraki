@@ -19,7 +19,7 @@ typedef struct Nodo {
 } Nodo;
 
 // Funciones
-struct Nodo * CrearNodo(char * Descripcion);
+struct Nodo * CrearNodo(char * Descripcion, int Duracion);
 void InsertarNodo(struct Nodo ** Start, struct Nodo * VNodo);
 void InsertarAlFinal(struct Nodo * Start, struct Nodo * VNodo);
 struct Nodo * BuscarNodo(struct Nodo * Start, int IdBuscado);
@@ -30,20 +30,46 @@ void EliminarListaNodo(struct Nodo * Start);
 int main() {
     struct Nodo *TareasPendientes = NULL;
     struct Nodo *TareasRealizadas = NULL;
+    char Buff[128];
+    int Duracion = 0;
+    int Continuar = 1;
 
     srand(time(NULL)); // Empezar con una semilla distinta para el generador de numeros aleatoreo
+
+    while (Continuar) {
+        printf("Ingrese descripcion de tarea: ");
+        fflush(stdin); // Limpiar el buffer de la consola
+        fgets(Buff, sizeof(Buff), stdin);
+
+        do {
+            printf("Ingrese Duracion de tarea: ");
+            fflush(stdin); // Limpiar el buffer de la consola
+            scanf("%d", &Duracion);
+
+            if (Duracion < 10 || Duracion > 100) printf("Fuera de rango de duracion, intente de nuevo.\n\n");
+        } while (Duracion < 10 || Duracion > 100);
+
+        InsertarNodo(&TareasPendientes, CrearNodo(Buff, Duracion));
+
+        printf("Quieres ingresar otra tarea? (1 = SI / 0 = NO): ");
+        scanf("%d", &Continuar);
+    }
+
+    // Liberar Memoria
+    EliminarListaNodo(TareasPendientes);
+    EliminarListaNodo(TareasRealizadas);
 
     return 0;
 }
 
 
-struct Nodo * CrearNodo(char * Descripcion) {
+struct Nodo * CrearNodo(char * Descripcion, int Duracion) {
     struct Nodo * VNodo = (struct Nodo *) malloc(sizeof(struct Nodo));
 
     VNodo->T.TareaID = TareaIDs;
     VNodo->T.Descripcion = (char *) malloc(sizeof(char) * (strlen(Descripcion) + 1));
     strcpy(VNodo->T.Descripcion, Descripcion);
-    VNodo->T.Duracion = (rand() % (100 - 10 + 1)) + 10; // (rand() % (MAX - MIN + 1)) + MIN
+    VNodo->T.Duracion = Duracion;
     VNodo->Siguiente = NULL;
 
     TareaIDs++;
