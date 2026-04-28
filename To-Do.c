@@ -27,6 +27,8 @@ struct Nodo * QuitarNodo(struct Nodo ** Start, int IdBuscado);
 void EliminarNodo(struct Nodo * VNodo);
 void EliminarListaNodo(struct Nodo * Start);
 void MostrarListaNodo(struct Nodo * Start);
+void MostrarNodo(struct Nodo * VNodo);
+struct Nodo * BuscarNodoPorPalabra(struct Nodo * Start, char * Planbra);
 
 
 int main() {
@@ -37,6 +39,7 @@ int main() {
     int Duracion = 0;
     int ID = 0;
     int Continuar = 1;
+    int Modo = 0;
 
     srand(time(NULL)); // Empezar con una semilla distinta para el generador de numeros aleatoreo
 
@@ -92,6 +95,47 @@ int main() {
     MostrarListaNodo(TareasPendientes);
     printf("\n=== Tareas Pendientes ===\n");
     MostrarListaNodo(TareasRealizadas);
+
+    printf("\nQue modo de busqueda usaras? (1 = Palabra / 0 = ID): ");
+    fflush(stdin); // Limpiar el buffer de la consola
+    scanf("%d", &Modo);
+
+    if (Modo) { // Por Plabra
+        printf("Ingrese Palabra a buscar: ");
+        fflush(stdin); // Limpiar el buffer de la consola
+        fgets(Buff, sizeof(Buff), stdin);
+        Buff[strcspn(Buff, "\n")] = 0; // Pasen como quitar el \n del final :pray:
+
+        NodoAux = BuscarNodoPorPalabra(TareasPendientes, Buff);
+        if (NodoAux) {
+            printf("\nTarea pendiente encontrada:\n");
+            MostrarNodo(NodoAux);
+        } else {
+            NodoAux = BuscarNodoPorPalabra(TareasRealizadas, Buff);
+            if (NodoAux) {
+                printf("\nTarea realizada encontrada:\n");
+                MostrarNodo(NodoAux);
+            }
+        }
+    } else { // Por ID
+        printf("Ingrese ID a buscar: ");
+        fflush(stdin); // Limpiar el buffer de la consola
+        scanf("%d", &ID);
+
+        NodoAux = BuscarNodo(TareasPendientes, ID);
+        if (NodoAux) {
+            printf("\nTarea pendiente encontrada:\n");
+            MostrarNodo(NodoAux);
+        } else {
+            NodoAux = BuscarNodo(TareasRealizadas, ID);
+            if (NodoAux) {
+                printf("\nTarea realizada encontrada:\n");
+                MostrarNodo(NodoAux);
+            } else {
+                printf("\nNo se encontro la tarea");
+            }
+        }
+    }
 
     // Liberar Memoria
     EliminarListaNodo(TareasPendientes);
@@ -185,15 +229,29 @@ void MostrarListaNodo(struct Nodo * Start) {
 
     if (NodoAux) {
         while (NodoAux) {
-            printf("ID: %d\tDuracion: %d\tDesc: %s\n",
-                NodoAux->T.TareaID,
-                NodoAux->T.Duracion,
-                NodoAux->T.Descripcion
-            );
+            MostrarNodo(NodoAux);
 
             NodoAux = NodoAux->Siguiente;
         }
     } else {
         printf("Lista vacia\n");
     }
+}
+
+void MostrarNodo(struct Nodo * VNodo) {
+    printf("ID: %d\tDuracion: %d\tDesc: %s\n",
+        VNodo->T.TareaID,
+        VNodo->T.Duracion,
+        VNodo->T.Descripcion
+    );
+}
+
+struct Nodo * BuscarNodoPorPalabra(struct Nodo * Start, char * Planbra) {
+    struct Nodo * Aux = Start;
+
+    while (Aux && !strstr(Aux->T.Descripcion, Planbra)) {
+        Aux = Aux->Siguiente;
+    }
+
+    return Aux;
 }
